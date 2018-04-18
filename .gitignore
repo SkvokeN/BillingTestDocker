@@ -1,0 +1,8 @@
+.idea
+app
+mysql/database
+mysql/ssl/*.pem
+mysql-ssl/ssl/*.pem
+mysql-ssl/database
+mysql-ssl/database-test
+.env

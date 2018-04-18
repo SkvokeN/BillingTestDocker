@@ -1,0 +1,66 @@
+version: "3.1"
+
+services:
+  php-cli:
+    build:
+      context: ./php-cli
+      dockerfile: Dockerfile
+      args:
+        HOST_UID: ${HOST_UID}
+        USER: deploy
+    image: php-cli:0.0.1
+    container_name: php-cli
+    depends_on:
+      - mysql
+    volumes:
+      - ./app:/app:rw
+    networks:
+      - backend
+  mysql:
+    build: ./mysql-ssl
+    image: mysql-ssl:0.0.1
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "3316:3306"
+    volumes:
+      - ./mysql-ssl/database:/var/lib/mysql:rw
+      - ./mysql-ssl/config/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+    networks:
+      - backend
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      HOSTNAME: rabbitmq
+      RABBITMQ_DEFAULT_USER: acme
+      RABBITMQ_DEFAULT_PASS: acme
+    ports:
+      - "15672:15672"
+    networks:
+      - backend
+  supervisor:
+    build:
+      context: ./supervisor
+      dockerfile: Dockerfile
+      args:
+        HOST_UID: ${HOST_UID}
+        USER: deploy
+    image: supervisor:0.0.1
+    container_name: supervisor-dev
+    depends_on:
+      - mysql
+    volumes:
+      - ./supervisor/config/debit-queue.conf:/etc/supervisor/conf.d/debit-queue.conf:ro
+      - ./supervisor/config/deposit-queue.conf:/etc/supervisor/conf.d/deposit-queue.conf:ro
+      - ./supervisor/config/transfer-queue.conf:/etc/supervisor/conf.d/transfer-queue.conf:ro
+      - ./supervisor/config/supervisor.conf:/etc/supervisor/supervisor.conf:ro
+      - ./app:/app:rw
+    networks:
+      - backend
+networks:
+  backend:
