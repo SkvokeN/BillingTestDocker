@@ -54,6 +54,7 @@ services:
     container_name: supervisor-dev
     depends_on:
       - mysql
+      - rabbitmq
     volumes:
       - ./supervisor/config/debit-queue.conf:/etc/supervisor/conf.d/debit-queue.conf:ro
       - ./supervisor/config/deposit-queue.conf:/etc/supervisor/conf.d/deposit-queue.conf:ro
