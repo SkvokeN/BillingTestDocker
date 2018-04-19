@@ -27,6 +27,7 @@ RUN docker-php-ext-install mbstring \
     intl \
     pdo \
     pdo_mysql \
+    bcmath \
     iconv \
     mcrypt \
     soap \
